@@ -121,7 +121,7 @@ function tick() {
     setProgress(total ? (now / total) * 100 : 0);
   }
 }
-function updateClock() { $('clock').textContent = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' }).format(new Date()); }
+function updateClock() { $('clock').textContent = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date()); }
 
 ui.artwork.addEventListener('error', () => { ui.artwork.src = placeholderArtwork; });
 ui.play.addEventListener('click', togglePlayback);
