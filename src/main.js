@@ -1,5 +1,7 @@
 import './style.css';
 
+const placeholderArtwork = '/placeholder-art.svg';
+
 const config = {
   apiKey: import.meta.env.VITE_YOUTUBE_API_KEY,
   playlistId: import.meta.env.VITE_YOUTUBE_PLAYLIST_ID,
@@ -34,7 +36,7 @@ function setProgress(value) {
 function renderTrack() {
   const track = tracks[currentIndex]; if (!track) return;
   ui.name.textContent = track.title; ui.artist.textContent = track.artist;
-  ui.artwork.src = track.thumbnail; ui.artwork.alt = `${track.title} artwork`;
+  ui.artwork.src = track.thumbnail || placeholderArtwork; ui.artwork.alt = `${track.title} artwork`;
   ui.duration.textContent = formatTime(track.duration); ui.current.textContent = '0:00'; setProgress(0);
 }
 async function getTracks() {
@@ -121,6 +123,7 @@ function tick() {
 }
 function updateClock() { $('clock').textContent = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' }).format(new Date()); }
 
+ui.artwork.addEventListener('error', () => { ui.artwork.src = placeholderArtwork; });
 ui.play.addEventListener('click', togglePlayback);
 ui.previous.addEventListener('click', () => { hasUserStartedPlayback = true; changeTrack(-1, true); });
 ui.next.addEventListener('click', () => { hasUserStartedPlayback = true; changeTrack(1, true); });
