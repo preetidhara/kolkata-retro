@@ -31,7 +31,8 @@
   </head>
   <body>
     <main class="hero">
-      <video class="hero-video" autoplay muted loop playsinline>
+      <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+        <source media="(max-width: 700px)" src="/1786447129350824-mobile.mp4" type="video/mp4" />
         <source src="/1786447129350824.mp4" type="video/mp4" />
       </video>
       <div class="scrim" aria-hidden="true"></div>

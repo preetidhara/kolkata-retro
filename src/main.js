@@ -1,6 +1,6 @@
 import './style.css';
 
-const placeholderArtwork = '/placeholder-art.svg';
+const placeholderArtwork = "placeholder.png"
 
 const config = {
   apiKey: import.meta.env.VITE_YOUTUBE_API_KEY,
@@ -13,7 +13,7 @@ const ui = {
   current: $('current-time'), duration: $('duration'), play: $('play-pause'), playIcon: $('play-icon'),
   pauseIcon: $('pause-icon'), message: $('player-message'), previous: $('previous'), next: $('next'), repeat: $('repeat'),
 };
-let tracks = [], currentIndex = 0, player, playerReady = false, isSeeking = false, ticker, blockedTracks = 0, repeatMode = false, hasUserStartedPlayback = false;
+let tracks = [], currentIndex = 0, player, playerReady = false, isSeeking = false, ticker, blockedTracks = 0, repeatMode = false, hasUserStartedPlayback = false, lastControlInteraction = 0;
 
 function seconds(iso = '') {
   const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -124,9 +124,22 @@ function tick() {
 function updateClock() { $('clock').textContent = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date()); }
 
 ui.artwork.addEventListener('error', () => { ui.artwork.src = placeholderArtwork; });
-ui.play.addEventListener('click', togglePlayback);
-ui.previous.addEventListener('click', () => { hasUserStartedPlayback = true; changeTrack(-1, true); });
-ui.next.addEventListener('click', () => { hasUserStartedPlayback = true; changeTrack(1, true); });
+function runFromUserGesture(action) {
+  const now = performance.now();
+  if (now - lastControlInteraction < 350) return;
+  lastControlInteraction = now;
+  action();
+}
+function bindPlaybackControl(element, action) {
+  element.addEventListener('pointerup', (event) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    runFromUserGesture(action);
+  });
+  element.addEventListener('click', () => runFromUserGesture(action));
+}
+bindPlaybackControl(ui.play, togglePlayback);
+bindPlaybackControl(ui.previous, () => { hasUserStartedPlayback = true; changeTrack(-1, true); });
+bindPlaybackControl(ui.next, () => { hasUserStartedPlayback = true; changeTrack(1, true); });
 ui.repeat.addEventListener('click', () => { repeatMode = !repeatMode; ui.repeat.classList.toggle('active', repeatMode); ui.repeat.setAttribute('aria-pressed', String(repeatMode)); ui.repeat.setAttribute('aria-label', `Repeat ${repeatMode ? 'on' : 'off'}`); });
 ui.progress.addEventListener('pointerdown', () => { isSeeking = true; });
 ui.progress.addEventListener('input', () => { const total = player?.getDuration() || tracks[currentIndex]?.duration || 0; setProgress(ui.progress.value); ui.current.textContent = formatTime(total * ui.progress.value / 100); });
